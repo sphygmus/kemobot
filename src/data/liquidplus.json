@@ -1,0 +1,11 @@
+{
+	"prioritized": [],
+	"checkins": [],
+	"running": false,
+	"interface": "0",
+	"streamData": {
+		"lastUpdate": 0,
+		"streams": [],
+		"running": true
+	}
+}
