@@ -114,7 +114,7 @@ const checkAndUpdateStreams = async () => {
 		}
 	}
 
-	for (const stream of streams.low) {
+	for (const stream of streamData.streams) {
 		if (streams.high.includes(stream) || streams.regular.includes(stream) || streams.low.includes(stream)) {
 			if (!safeStreams.includes(stream) && safeStreams.length < 2)
 				safeStreams.push(stream);
