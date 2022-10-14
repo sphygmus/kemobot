@@ -1,7 +1,5 @@
-import { ButtonBuilder } from "@discordjs/builders";
-import { ActionRowBuilder, ButtonStyle } from "discord.js";
-import "dotenv/config";
 import tmi from "tmi.js";
+import { ActionRowBuilder, ButtonBuilder, ButtonStyle } from "discord.js";
 import { checkAndUpdateStreams, getExistingData, saveLiquidPlusData, updateLiquidInterface } from "./utils/liquidplus";
 import { reportToFather } from "./utils/messages";
 
