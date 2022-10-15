@@ -1,7 +1,6 @@
-import "dotenv/config";
-import { REST, Routes } from "discord.js";
 import fs from "fs";
 import path from "path";
+import { REST, Routes } from "discord.js";
 
 const rest = new REST({ version: "10" }).setToken(process.env.BOT_TOKEN);
 

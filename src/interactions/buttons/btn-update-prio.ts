@@ -11,13 +11,13 @@ export default <ButtonAction>{
 		const addPrioInput = new TextInputBuilder()
 			.setCustomId("input-add-prio")
 			.setLabel("Streams to add to the prioritized list")
-			.setStyle(TextInputStyle.Short)
+			.setStyle(TextInputStyle.Paragraph)
 			.setRequired(false);
 
 		const removePrioInput = new TextInputBuilder()
 			.setCustomId("input-remove-prio")
 			.setLabel("Streams to remove from the prioritized list")
-			.setStyle(TextInputStyle.Short)
+			.setStyle(TextInputStyle.Paragraph)
 			.setRequired(false);
 
 		const addPrioActionRow = new ActionRowBuilder<ModalActionRowComponentBuilder>().addComponents(addPrioInput);

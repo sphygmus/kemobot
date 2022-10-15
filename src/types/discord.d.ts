@@ -8,6 +8,9 @@ import {
 	SlashCommandSubcommandsOnlyBuilder
 } from "discord.js";
 
+import { AudioPlayer } from "@discordjs/voice";
+import { LoopType } from "../utils/music";
+
 declare global {
 	type SlashCommand = Omit<SlashCommandBuilder, "addSubcommand" | "addSubcommandGroup"> | SlashCommandSubcommandsOnlyBuilder
 
@@ -48,15 +51,39 @@ declare global {
 		time: number;
 	}
 
-	type GuildData = {
+	interface GuildData {
 		guildID: string;
 		defaultRole?: string;
 		channels: {
 			welcome?: string;
 			bot?: string;
 			log?: string;
+		};
+		music: {
+			channelID?: string;
+			messageID?: string;
 		}
 	}
+
+	type SongData = {
+		url: string;
+		title: string;
+		duration: string;
+		thumbnail: string;
+		requestedBy: string;
+		requestTime: number;
+	}
+
+
+	interface GuildMusicData {
+		guildID: string;
+		looping: LoopType;
+		player?: AudioPlayer;
+		playingIn?: string;
+		queue: SongData[];
+	}
+
+
 }
 
 export { }

@@ -2,15 +2,13 @@ import "dotenv/config";
 import fs from "fs";
 import path from "path";
 
-import { ActivityType, Client, GatewayIntentBits, Message, REST } from "discord.js";
+import { ActivityType, Client, GatewayIntentBits } from "discord.js";
 import { loadInteractions, refreshSlashCommands } from "./utils/commands";
 import { loadMessageActions, sendGuildMessage } from "./utils/messages";
 import { updateGuildVoiceData } from "./utils/voicelog";
 import { getGuilds } from "./utils/guilds";
 
 import Twitch from "./twitch";
-
-const rest = new REST({ version: "10" }).setToken(process.env.BOT_TOKEN);
 
 let messages: MessageAction[];
 let commands: DiscordCommand[];
