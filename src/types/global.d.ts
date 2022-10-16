@@ -2,6 +2,7 @@ declare global {
 	namespace NodeJS {
 		interface ProcessEnv {
 			BOT_VERSION: string;
+			DEV?: string;
 			BOT_TOKEN: string;
 			CLIENT_ID: string;
 			FATHER_ID: string;

@@ -2,7 +2,7 @@ import fs from "fs";
 import path from "path";
 import { REST, Routes } from "discord.js";
 
-const rest = new REST({ version: "10" }).setToken(process.env.BOT_TOKEN);
+const rest = new REST({ version: "10" }).setToken(process.env[process.env.DEV ? "DEBUG_TOKEN" : "BOT_TOKEN"]);
 
 const loadConfigs = async () => {
 	const commands = fs.readdirSync(path.join(__dirname, "../interactions/commands")).filter(file => !file.includes("_") && (file.endsWith(".ts") || file.endsWith(".js")));
@@ -49,7 +49,10 @@ const refreshSlashCommands = async () => {
 		console.log("Started refreshing application (/) commands.");
 
 		const commands = await loadConfigs();
-		await rest.put(Routes.applicationCommands(process.env.CLIENT_ID), { body: commands });
+		if (process.env.DEV)
+			await rest.put(Routes.applicationGuildCommands(process.env.DEBUG_CLIENT_ID, process.env.DEBUG_GUILD_ID), { body: commands });
+		else
+			await rest.put(Routes.applicationCommands(process.env.CLIENT_ID), { body: commands });
 
 		console.log("Successfully reloaded application (/) commands.");
 	} catch (error) {

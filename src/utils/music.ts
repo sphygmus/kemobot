@@ -1,5 +1,5 @@
-import { AudioPlayerStatus, createAudioPlayer, createAudioResource, getVoiceConnection, joinVoiceChannel } from "@discordjs/voice";
-import { ActionRowBuilder, ButtonBuilder, ButtonStyle, Colors, EmbedBuilder, MessageReplyOptions, TextChannel, VoiceChannel } from "discord.js";
+import { AudioPlayerStatus, createAudioPlayer, createAudioResource, getVoiceConnection, joinVoiceChannel, VoiceConnectionStatus } from "@discordjs/voice";
+import { ActionRowBuilder, APIEmbedField, ButtonBuilder, ButtonStyle, Colors, EmbedBuilder, MessageReplyOptions, RestOrArray, TextChannel, VoiceChannel } from "discord.js";
 import { search } from "youtube-search-without-api-key";
 import ytdl from "ytdl-core";
 
@@ -59,18 +59,18 @@ const toggleSong = (guildID: string) => {
 	}
 }
 
-const toggleLoop = async (guildID: string) => {
-	const guildIndex = getGuildIndex(guildID);
-	queue[guildIndex].looping = (queue[guildIndex].looping + 1) % 4;
-	await showPlayerInterface(guildID);
-}
-
 const loopingText = [
 	"None",
 	"Once",
 	"Single",
 	"Playlist"
 ]
+
+const toggleLoop = async (guildID: string) => {
+	const guildIndex = getGuildIndex(guildID);
+	queue[guildIndex].looping = (queue[guildIndex].looping + 1) % loopingText.length;
+	await showPlayerInterface(guildID);
+}
 
 const interfaceObject = async (guildID: string) => {
 	const guildIndex = getGuildIndex(guildID);
@@ -79,17 +79,26 @@ const interfaceObject = async (guildID: string) => {
 
 	const currentSong = guildQueue.queue.length > 0 ? guildQueue.queue[0] : null;
 	const requester = currentSong ? await getUser(currentSong.requestedBy) : null;
-	const requestMessage = requester ? `Requested by ${requester.username}` : "Waiting for update...";
 	const requestAvatar = requester ? requester.avatarURL({ extension: "png", size: 64 }) : null;
+
+	const description = currentSong ?
+		`**${currentSong.title + "\u200B ".repeat(25)}**` :
+		"There are no songs in queue.";
+
+	const fields: APIEmbedField[] = guildQueue.queue.length > 1 ? [{
+		name: "\u200B ".repeat(4) + "Next in queue:",
+		value: `*${guildQueue.queue[1].title} (Requested by: ${(await getUser(guildQueue.queue[1].requestedBy)).username})*`
+	}] : [];
 
 	const embed = new EmbedBuilder()
 		.setColor(Colors.Gold)
 		.setTitle(`Currently ${playing ? "playing" : "paused"}`)
 		.setURL(currentSong ? currentSong.url : null)
-		.setDescription(currentSong ? `${currentSong.title + "\u200B ".repeat(25)}` : "There are no songs in queue.")
+		.setDescription(description)
 		.setThumbnail(currentSong ? currentSong.thumbnail : null)
-		.setFooter({ text: requestMessage, iconURL: requestAvatar || undefined })
+		.setFooter(requester ? { text: `Requested by ${requester.username}`, iconURL: requestAvatar || undefined } : null)
 		.setTimestamp(currentSong ? currentSong.requestTime : null)
+		.setFields(fields)
 
 	const buttonOptions = new ActionRowBuilder<ButtonBuilder>()
 		.addComponents(
@@ -97,11 +106,6 @@ const interfaceObject = async (guildID: string) => {
 				.setCustomId("btn-music-add")
 				.setLabel("Add Songs")
 				.setStyle(ButtonStyle.Primary),
-			/* new ButtonBuilder()
-				.setCustomId("btn-music-toggle")
-				.setLabel(playing ? "Pause" : "Play")
-				.setStyle(playing ? ButtonStyle.Success : ButtonStyle.Danger)
-				.setDisabled(guildQueue.queue.length === 0), */
 			new ButtonBuilder()
 				.setCustomId("btn-music-loop")
 				.setLabel(`Loop: ${loopingText[guildQueue.looping]}`)
@@ -109,7 +113,7 @@ const interfaceObject = async (guildID: string) => {
 				.setDisabled(guildQueue.queue.length === 0),
 			new ButtonBuilder()
 				.setCustomId("btn-music-queue")
-				.setLabel("Queue")
+				.setLabel("Queue" + (guildQueue.queue.length > 1 ? `: ${guildQueue.queue.length}` : ""))
 				.setStyle(ButtonStyle.Secondary)
 				.setDisabled(guildQueue.queue.length < 2),
 			new ButtonBuilder()
@@ -168,7 +172,7 @@ const showPlayerInterface = async (guildID: string, channelID?: string) => {
 			try {
 				const oldInterface = await channel.messages.fetch(musicData.messageID);
 
-				if (deleteInterface) {
+				if (deleteInterface && oldInterface.deletable) {
 					await oldInterface.delete();
 					return;
 				}
@@ -218,7 +222,7 @@ const getGuildIndex = (guildID: string) => {
 const addToQueue = async (guildID: string, video: string, requestedBy: string, slash = false) => {
 	const guildQueue = getGuildIndex(guildID);
 
-	const songInput = video.split("\n");
+	const songInput = video.split("\n").filter(song => song.length > 1);
 	for (const songString of songInput) {
 		const searchResults = await search(songString);
 		const song = searchResults[0];
@@ -236,6 +240,8 @@ const addToQueue = async (guildID: string, video: string, requestedBy: string, s
 			await playNextSong(guildID, slash);
 		}
 	}
+
+	await showPlayerInterface(guildID);
 }
 
 const getGuildMusicData = (guildID: string) => {
@@ -273,13 +279,25 @@ const attemptJoinChannel = async (guildID: string, slash = false) => {
 				}
 			});
 
+			connection.on("stateChange", async (oldState, newState) => {
+				if ([VoiceConnectionStatus.Destroyed, VoiceConnectionStatus.Disconnected].includes(newState.status)) {
+					queue[guildQueue] = {
+						guildID,
+						looping: LoopType.None,
+						queue: []
+					}
+
+					await showPlayerInterface(guildID);
+				}
+			})
+
 			await playNextSong(guildID, slash);
 			break;
 		}
 	}
 }
 
-const checkUsersInVoice = async (guildID: string) => {
+const checkUsersInVoice = async (guildID: string, userID?: string) => {
 	const guildQueue = getGuildIndex(guildID);
 	const voiceChannelID = queue[guildQueue].playingIn;
 
@@ -290,6 +308,11 @@ const checkUsersInVoice = async (guildID: string) => {
 	const voiceChannel = await guildData.channels.fetch(voiceChannelID) as VoiceChannel | null;
 
 	if (voiceChannel) {
+		if (userID) {
+			const userInChannel = voiceChannel.members.find(user => user.id === userID);
+			return userInChannel !== undefined;
+		}
+
 		const botsInChannel = voiceChannel.members.filter(members => members.user.bot).size;
 		const usersInChannel = voiceChannel.members.size - botsInChannel;
 		return usersInChannel > 0;
@@ -314,6 +337,7 @@ const playNextSong = async (guildID: string, slash = false) => {
 		const player = queue[guildQueue].player;
 
 		if (player) {
+			// const quality = process.env.DEV ? "lowestaudio" : "highestaudio";
 			const stream = ytdl(nextInQueue.url, { filter: "audioonly", quality: "lowestaudio" });
 			const resource = createAudioResource(stream);
 			player.play(resource);
@@ -328,4 +352,4 @@ const playNextSong = async (guildID: string, slash = false) => {
 		await showPlayerInterface(guildID);
 }
 
-export { addToQueue, getGuildMusicData, showPlayerInterface, skipSong, toggleLoop, toggleSong, LoopType }
+export { addToQueue, checkUsersInVoice, getGuildMusicData, getUser, showPlayerInterface, skipSong, toggleLoop, toggleSong, LoopType }

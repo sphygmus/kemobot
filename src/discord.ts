@@ -47,7 +47,8 @@ client.once("ready", async (self) => {
 	buttons = btn_temp;
 	modals = mdl_temp;
 
-	await Twitch.connect();
+	if (!process.env.DEV)
+		await Twitch.connect();
 });
 
 client.on("interactionCreate", async interaction => {
@@ -150,6 +151,6 @@ client.on("guildMemberRemove", async member => {
 })
 
 refreshSlashCommands();
-client.login(process.env.BOT_TOKEN);
+client.login(process.env[process.env.DEV ? "DEBUG_TOKEN" : "BOT_TOKEN"]);
 
 export default client;
