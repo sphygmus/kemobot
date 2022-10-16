@@ -6,6 +6,7 @@ import { ActivityType, Client, GatewayIntentBits } from "discord.js";
 import { loadInteractions, refreshSlashCommands } from "./utils/commands";
 import { loadMessageActions, sendGuildMessage } from "./utils/messages";
 import { updateGuildVoiceData } from "./utils/voicelog";
+import { getAllReminders, setTimer } from "./utils/timer";
 import { getGuilds } from "./utils/guilds";
 
 import Twitch from "./twitch";
@@ -49,6 +50,11 @@ client.once("ready", async (self) => {
 
 	if (!process.env.DEV)
 		await Twitch.connect();
+
+	const reminders = getAllReminders();
+	for (const reminder of reminders) {
+		await setTimer(reminder);
+	}
 });
 
 client.on("interactionCreate", async interaction => {

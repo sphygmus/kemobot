@@ -13,6 +13,14 @@ declare global {
 			TWITCH_PASS: string;
 		}
 	}
+
+	interface Timer {
+		userID: string;
+		description: string;
+		startTime: number;
+		targetTime: number;
+		channelID: string;
+	}
 }
 
 export { }

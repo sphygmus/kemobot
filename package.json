@@ -1,12 +1,12 @@
 {
 	"name": "kemobot",
-	"version": "1.5.2",
+	"version": "1.5.3",
 	"description": "",
 	"main": "index.js",
 	"scripts": {
 		"start": "ts-node src/discord.ts",
 		"debug": "cross-env DEV=true npm start",
-		"dev": "cross-env DEV=true nodemon src/discord.ts",
+		"dev": "cross-env DEV=true nodemon --ignore src/data/ src/discord.ts",
 		"reset": "ts-node src/utils/reset.ts"
 	},
 	"keywords": [],
@@ -21,6 +21,7 @@
 		"ffmpeg-static": "^5.1.0",
 		"sodium-native": "^3.4.1",
 		"tmi.js": "^1.8.5",
+		"twitter-api-v2": "^1.12.8",
 		"youtube-search-without-api-key": "^1.0.7",
 		"ytdl-core": "^4.11.2"
 	},

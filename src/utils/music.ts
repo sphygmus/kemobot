@@ -1,5 +1,5 @@
 import { AudioPlayerStatus, createAudioPlayer, createAudioResource, getVoiceConnection, joinVoiceChannel, VoiceConnectionStatus } from "@discordjs/voice";
-import { ActionRowBuilder, APIEmbedField, ButtonBuilder, ButtonStyle, Colors, EmbedBuilder, MessageReplyOptions, RestOrArray, TextChannel, VoiceChannel } from "discord.js";
+import { ActionRowBuilder, APIEmbedField, ButtonBuilder, ButtonStyle, Colors, EmbedBuilder, MessageReplyOptions, TextChannel, VoiceChannel } from "discord.js";
 import { search } from "youtube-search-without-api-key";
 import ytdl from "ytdl-core";
 
