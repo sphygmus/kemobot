@@ -166,7 +166,6 @@ const updateLiquidInterface = async () => {
 	const buttonOptions = new ActionRowBuilder<ButtonBuilder>()
 		.addComponents(
 			new ButtonBuilder()
-				.setCustomId("btn-lqdplus-link")
 				.setLabel("Liquid+")
 				.setStyle(ButtonStyle.Link)
 				.setURL("https://liquidplus.com/"),
