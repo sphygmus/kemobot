@@ -166,10 +166,15 @@ const updateLiquidInterface = async () => {
 	const buttonOptions = new ActionRowBuilder<ButtonBuilder>()
 		.addComponents(
 			new ButtonBuilder()
+				.setCustomId("btn-lqdplus-link")
+				.setLabel("Liquid+")
+				.setStyle(ButtonStyle.Link)
+				.setURL("https://liquidplus.com/"),
+			new ButtonBuilder()
 				.setCustomId("btn-refresh-streams")
 				.setLabel("Refresh")
-				.setDisabled(!streamData.running)
-				.setStyle(ButtonStyle.Primary),
+				.setStyle(ButtonStyle.Primary)
+				.setDisabled(!streamData.running),
 			new ButtonBuilder()
 				.setCustomId("btn-update-prio")
 				.setLabel("Update Prioritized Streams")

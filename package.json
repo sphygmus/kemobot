@@ -1,8 +1,7 @@
 {
 	"name": "kemobot",
-	"version": "1.5.3",
-	"description": "",
-	"main": "index.js",
+	"version": "1.5.4",
+	"description": "Sphygmus' personal Discord and Twitch bot.",
 	"scripts": {
 		"start": "ts-node src/discord.ts",
 		"debug": "cross-env DEV=true npm start",
@@ -10,7 +9,7 @@
 		"reset": "ts-node src/utils/reset.ts"
 	},
 	"keywords": [],
-	"author": "",
+	"author": "Sphygmus",
 	"license": "ISC",
 	"dependencies": {
 		"@discordjs/opus": "^0.8.0",

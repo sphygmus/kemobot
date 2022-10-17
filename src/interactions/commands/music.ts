@@ -1,5 +1,5 @@
-import { SlashCommandBuilder, TextChannel } from "discord.js";
-import { addToQueue, getGuildMusicData, showPlayerInterface } from "../../utils/music";
+import { SlashCommandBuilder } from "discord.js";
+import { addToQueue, showPlayerInterface } from "../../utils/music";
 
 // https://github.com/fent/node-ytdl-core/issues/994
 

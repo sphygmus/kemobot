@@ -1,4 +1,4 @@
-import { Guild, PermissionFlagsBits, SlashCommandBuilder } from "discord.js";
+import { PermissionFlagsBits, SlashCommandBuilder } from "discord.js";
 import { getGuilds, updateGuildData } from "../../utils/guilds";
 
 const config = new SlashCommandBuilder()

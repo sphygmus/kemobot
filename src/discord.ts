@@ -14,6 +14,7 @@ import Twitch from "./twitch";
 let messages: MessageAction[];
 let commands: DiscordCommand[];
 let buttons: ButtonAction[];
+let menus: MenuAction[];
 let modals: ModalAction[];
 
 let members: MemberRank[];
@@ -42,10 +43,11 @@ client.once("ready", async (self) => {
 	client.emit("reload");
 	messages = await loadMessageActions();
 
-	const [cmd_temp, btn_temp, mdl_temp] = await loadInteractions();
+	const [cmd_temp, btn_temp, mnu_temp, mdl_temp] = await loadInteractions();
 
 	commands = cmd_temp;
 	buttons = btn_temp;
+	menus = mnu_temp;
 	modals = mdl_temp;
 
 	if (!process.env.DEV)
@@ -59,7 +61,7 @@ client.once("ready", async (self) => {
 
 client.on("interactionCreate", async interaction => {
 	if (interaction.isChatInputCommand()) {
-		const command = commands.find(cmd => cmd.config.name === interaction.commandName);
+		const command = commands.find(cmd => interaction.commandName.includes(cmd.config.name));
 		if (command?.minimumRank) {
 			const userRank = members.find(list => list.userID === interaction.user.id);
 			if (!userRank || userRank.rank < command.minimumRank) {
@@ -71,10 +73,13 @@ client.on("interactionCreate", async interaction => {
 
 		command?.exec(interaction);
 	} else if (interaction.isButton()) {
-		const button = buttons.find(btn => btn.id === interaction.customId);
+		const button = buttons.find(btn => interaction.customId.includes(btn.id));
 		button?.exec(interaction);
+	} else if (interaction.isSelectMenu()) {
+		const menu = menus.find(mnu => interaction.customId.includes(mnu.id));
+		menu?.exec(interaction);
 	} else if (interaction.isModalSubmit()) {
-		const modal = modals.find(mdl => mdl.id === interaction.customId);
+		const modal = modals.find(mdl => interaction.customId.includes(mdl.id));
 		modal?.exec(interaction);
 	}
 });
@@ -116,6 +121,9 @@ client.on("messageDelete", async message => {
 })
 
 client.on("voiceStateUpdate", async (oldState, newState) => {
+	if (process.env.DEV)
+		return;
+
 	const oldChannel = oldState.channel ? oldState.channel.name : "(undefined)";
 	const newChannel = newState.channel ? newState.channel.name : "(undefined)";
 

@@ -20,9 +20,14 @@ const loadConfigs = async () => {
 const loadInteractions = async () => {
 	const commandFiles = fs.readdirSync(path.join(__dirname, "../interactions/commands")).filter(file => file.endsWith(".ts") || file.endsWith(".js"));
 	const buttonFiles = fs.readdirSync(path.join(__dirname, "../interactions/buttons")).filter(file => file.endsWith(".ts") || file.endsWith(".js"));
+	const menuFiles = fs.readdirSync(path.join(__dirname, "../interactions/menus")).filter(file => file.endsWith(".ts") || file.endsWith(".js"));
 	const modalFiles = fs.readdirSync(path.join(__dirname, "../interactions/modals")).filter(file => file.endsWith(".ts") || file.endsWith(".js"));
 
-	const commands: DiscordCommand[] = [], buttons: ButtonAction[] = [], modals: ModalAction[] = [];
+	const commands: DiscordCommand[] = [];
+	const buttons: ButtonAction[] = [];
+	const menus: MenuAction[] = [];
+	const modals: ModalAction[] = [];
+
 	for (const file of commandFiles) {
 		const data = await import(`../interactions/commands/${file}`);
 		const command = data.default as DiscordCommand;
@@ -35,13 +40,19 @@ const loadInteractions = async () => {
 		buttons.push(action);
 	}
 
+	for (const file of menuFiles) {
+		const data = await import(`../interactions/menus/${file}`);
+		const action = data.default as MenuAction;
+		menus.push(action);
+	}
+
 	for (const file of modalFiles) {
 		const data = await import(`../interactions/modals/${file}`);
 		const action = data.default as ModalAction;
 		modals.push(action);
 	}
 
-	return [commands, buttons, modals] as [DiscordCommand[], ButtonAction[], ModalAction[]];
+	return [commands, buttons, menus, modals] as [DiscordCommand[], ButtonAction[], MenuAction[], ModalAction[]];
 }
 
 const refreshSlashCommands = async () => {
@@ -60,4 +71,8 @@ const refreshSlashCommands = async () => {
 	}
 }
 
-export { loadConfigs, loadInteractions, refreshSlashCommands }
+const splitInteractionID = (id: string) => {
+	return id.split("-");
+}
+
+export { loadConfigs, loadInteractions, refreshSlashCommands, splitInteractionID }

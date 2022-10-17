@@ -1,6 +1,6 @@
 import { SlashCommandBuilder } from "discord.js";
 import { getDate, getTime } from "../../utils/date";
-import { getAllReminders, saveReminder, setTimer } from "../../utils/timer";
+import { getUserReminders, saveReminder, setTimer } from "../../utils/timer";
 
 const config = new SlashCommandBuilder()
 	.setName("remind")
@@ -18,9 +18,10 @@ const config = new SlashCommandBuilder()
 
 const timeUnits = ["second", "minute", "hour", "day", "week", "month", "year"] as const;
 const dayNames = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"];
+const monthNames = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"];
 
 type TimeUnit = typeof timeUnits[number];
-type DayName = typeof dayNames[number];
+type DateUnit = typeof monthNames[number];
 
 const SECOND = 1000;
 const MINUTE = SECOND * 60;
@@ -32,9 +33,10 @@ const YEAR = MONTH * 12;
 
 const timeMultiplier = [SECOND, MINUTE, HOUR, DAY, WEEK, MONTH, YEAR];
 const timeUnitRegex = (type: TimeUnit) => new RegExp(`(\\d+|next)\\s(${type})(?:s)?`);
-// const dayNameRegex = (day: DayName) => new RegExp(`(next)?\\s?(${day})`);
+const dateUnitRegex = (type: DateUnit) => new RegExp(`(\\d{1,2})\\s(${type})\\s?((?:\\d{2}){1,2})?`);
 
 const CLOCK_REGEX = /(\d{1,2}):(\d{2})/;
+const DATE_REGEX = /(\d{1,2})\/(\d{1,2})\/((?:\d{2}){1,2})/;
 
 const decodeTimer = (time: string) => {
 	let targetTime = Date.now();
@@ -42,31 +44,81 @@ const decodeTimer = (time: string) => {
 	const clockMatch = time.match(CLOCK_REGEX);
 	if (clockMatch) {
 		const currentTime = new Date(targetTime);
-		const hour = parseInt(clockMatch[1]);
-		const minute = parseInt(clockMatch[2]);
-		currentTime.setUTCHours(hour, minute, 0, 0);
+		const hour = Math.max(0, Math.min(parseInt(clockMatch[1]), 23));
+		const minute = Math.max(0, Math.min(parseInt(clockMatch[2]), 59));
+		currentTime.setHours(hour, minute, 0, 0);
 		targetTime = currentTime.getTime();
 	}
 
-	for (const day in dayNames) {
-		if (!time.includes(dayNames[day]))
-			continue;
+	const dateMatch = time.match(DATE_REGEX);
+	const tomorrow = time.match("tomorrow");
 
-		const dayValue = time.match(dayNames[day]);
-		console.log(dayValue);
-		if (!dayValue)
-			continue;
-
+	if (tomorrow) {
+		targetTime += DAY;
+	} else if (dateMatch) {
 		const currentTime = new Date(targetTime);
-		const dayIndex = dayNames.indexOf(dayValue[0]);
-		const daysToAdd = (dayIndex - currentTime.getDay() + 7) % 7;
+		let year = parseInt(dateMatch[3]);
+		if (dateMatch[3].length < 3)
+			year += 2000;
 
-		currentTime.setDate(currentTime.getDate() + daysToAdd);
-		if (currentTime.getTime() <= targetTime)
-			currentTime.setDate(currentTime.getDate() + 7);
+		const month = Math.max(1, Math.min(12, parseInt(dateMatch[2]))) - 1;
+		const daysInMonth = new Date(year, month, 0).getDate();
+		const day = Math.max(1, Math.min(daysInMonth, parseInt(dateMatch[1])));
 
+		currentTime.setDate(day);
+		currentTime.setMonth(month);
+		currentTime.setFullYear(year);
 		targetTime = currentTime.getTime();
+	} else {
+		let dateFound = false;
+		for (const month in monthNames) {
+			if (!time.includes(monthNames[month]))
+				continue;
+
+			const monthMatch = time.match(dateUnitRegex(monthNames[month]));
+			if (!monthMatch)
+				continue;
+
+			dateFound = true;
+			const currentTime = new Date(targetTime);
+			let year = monthMatch[3] ? parseInt(monthMatch[3]) : currentTime.getFullYear();
+			if (year.toString().length < 3)
+				year += 2000;
+
+			const monthIndex = Math.max(0, Math.min(11, parseInt(month)));
+			const daysInMonth = new Date(year, monthIndex, 0).getDate();
+			const day = Math.max(1, Math.min(daysInMonth, parseInt(monthMatch[1])));
+
+			currentTime.setDate(day);
+			currentTime.setMonth(monthIndex);
+			currentTime.setFullYear(year);
+			targetTime = currentTime.getTime();
+			break;
+		}
+
+		if (!dateFound) {
+			for (const day in dayNames) {
+				if (!time.includes(dayNames[day]))
+					continue;
+
+				const dayValue = time.match(dayNames[day]);
+				if (!dayValue)
+					continue;
+
+				const currentTime = new Date(targetTime);
+				const dayIndex = dayNames.indexOf(dayValue[0]);
+				const daysToAdd = (dayIndex - currentTime.getDay() + 7) % 7;
+
+				currentTime.setDate(currentTime.getDate() + daysToAdd);
+				if (currentTime.getTime() <= targetTime)
+					currentTime.setDate(currentTime.getDate() + 7);
+
+				targetTime = currentTime.getTime();
+				break;
+			}
+		}
 	}
+
 
 	for (const unit in timeUnits) {
 		if (!time.includes(timeUnits[unit]))
@@ -88,8 +140,7 @@ export default <DiscordCommand>{
 	exec: async interaction => {
 		await interaction.deferReply({ ephemeral: true });
 
-		const allReminders = getAllReminders();
-		const userReminders = allReminders.filter(reminder => reminder.userID === interaction.user.id);
+		const userReminders = getUserReminders(interaction.user.id);
 		if (userReminders.length > 4) {
 			await interaction.editReply("You already have maximum amount of reminders set.");
 			return;
@@ -114,7 +165,6 @@ export default <DiscordCommand>{
 		}
 
 		saveReminder(timerData);
-		setTimer(timerData);
 
 		const reminderDate = getDate(targetTime);
 		const reminderTime = getTime(targetTime);

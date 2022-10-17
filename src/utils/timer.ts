@@ -1,14 +1,21 @@
-import { TextChannel } from "discord.js";
 import fs from "fs";
 import path from "path";
+import { TextChannel } from "discord.js";
 import Discord from "../discord";
 
 const REMINDERS_PATH = path.resolve(__dirname, "../data/reminders.json");
 
+interface LocalTimer extends Timer {
+	timer: NodeJS.Timeout;
+	timerID: string;
+}
+
+const localTimers: LocalTimer[] = [];
+
 const setTimer = async (data: Timer) => {
 	const currentTime = Date.now();
-	return await Promise.all([
-		setTimeout(async () => {
+	const timeOut = await new Promise<NodeJS.Timeout>((res) => {
+		const timer = setTimeout(async () => {
 			deleteReminder(data);
 
 			const difference = Date.now() - data.targetTime;
@@ -20,10 +27,20 @@ const setTimer = async (data: Timer) => {
 				if (channel && user)
 					channel.send(`${user}\n*You asked to be reminded about something ${days} days ago.*\n**Here is your message:**\n${data.description}`);
 			} catch (e) {
-				console.log("> [Discord] An error occured while firing the reminder.")
+				console.log("> [Discord] An error occured while firing the reminder.");
 			}
-		}, data.targetTime - currentTime)
-	]);
+		}, data.targetTime - currentTime);
+
+		res(timer);
+	});
+
+	const localTimer: LocalTimer = {
+		...data,
+		timer: timeOut,
+		timerID: `${data.userID}-${data.startTime}`
+	}
+
+	localTimers.push(localTimer);
 }
 
 const getAllReminders = () => {
@@ -32,9 +49,36 @@ const getAllReminders = () => {
 	return data;
 }
 
+const getUserReminders = (userID: string) => {
+	return getAllReminders().filter(reminder => reminder.userID === userID);
+}
+
+const getLocalTimer = (data: Timer) => {
+	return localTimers.find(timers => timers.timerID === `${data.userID}-${data.startTime}`);
+}
+
+const clearLocalTimer = (data: Timer) => {
+	const timerIndex = localTimers.findIndex(timers => timers.timerID === `${data.userID}-${data.startTime}`);
+	if (timerIndex < 0)
+		return;
+
+	deleteReminder(data);
+	localTimers.splice(timerIndex, 1);
+}
+
 const saveReminder = (data: Timer) => {
 	const allReminders = getAllReminders();
-	allReminders.push(data);
+	const stringifiedData = JSON.stringify(data);
+	const reminderIndex = allReminders.findIndex(reminder => JSON.stringify(reminder) === stringifiedData);
+
+	if (reminderIndex < 0)
+		allReminders.push(data);
+	else {
+		clearLocalTimer(data);
+		allReminders[reminderIndex] = data;
+	}
+
+	setTimer(data);
 	fs.writeFileSync(REMINDERS_PATH, JSON.stringify(allReminders, null, 4));
 }
 
@@ -46,8 +90,12 @@ const deleteReminder = (data: Timer) => {
 	if (reminderIndex < 0)
 		return;
 
+	const runningTimeout = getLocalTimer(data);
+	if (runningTimeout)
+		clearTimeout(runningTimeout.timer);
+
 	allReminders.splice(reminderIndex, 1);
 	fs.writeFileSync(REMINDERS_PATH, JSON.stringify(allReminders, null, 4));
 }
 
-export { getAllReminders, deleteReminder, saveReminder, setTimer }
+export { clearLocalTimer, getAllReminders, getLocalTimer, getUserReminders, deleteReminder, saveReminder, setTimer }

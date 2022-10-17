@@ -4,6 +4,7 @@ import {
 	ChatInputCommandInteraction,
 	Message,
 	ModalSubmitInteraction,
+	SelectMenuInteraction,
 	SlashCommandBuilder,
 	SlashCommandSubcommandsOnlyBuilder
 } from "discord.js";
@@ -23,6 +24,11 @@ declare global {
 	interface ButtonAction {
 		id: string;
 		exec: (interaction: ButtonInteraction) => void;
+	}
+
+	interface MenuAction {
+		id: string;
+		exec: (interaction: SelectMenuInteraction) => void;
 	}
 
 	interface MessageAction {
@@ -73,7 +79,6 @@ declare global {
 		requestedBy: string;
 		requestTime: number;
 	}
-
 
 	interface GuildMusicData {
 		guildID: string;
