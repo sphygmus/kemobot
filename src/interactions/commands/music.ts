@@ -16,6 +16,7 @@ export default <DiscordCommand>{
 	config,
 	exec: async interaction => {
 		await interaction.reply("*Rebuilding the music player interface...*");
+		await interaction.deleteReply();
 
 		if (interaction.guild) {
 			const newSong = interaction.options.getString("add");
@@ -25,6 +26,5 @@ export default <DiscordCommand>{
 				await showPlayerInterface(interaction.guild.id, interaction.channelId);
 		}
 
-		await interaction.deleteReply();
 	}
 }

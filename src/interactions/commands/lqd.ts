@@ -11,7 +11,7 @@ export default <DiscordCommand>{
 	minimumRank: 10,
 	exec: async interaction => {
 		await interaction.reply("*Loading Liquid+ command interface...*");
-		await updateLiquidInterface();
 		await interaction.deleteReply();
+		await updateLiquidInterface();
 	}
 }

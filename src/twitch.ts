@@ -52,7 +52,7 @@ client.on("message", async (channel, tags, message) => {
 					label: "Check-In"
 				}),
 				new ButtonBuilder({
-					custom_id: "btn-read-checkin",
+					custom_id: "btn-liquidplus-checkin",
 					style: ButtonStyle.Secondary,
 					label: "Mark as Read"
 				})

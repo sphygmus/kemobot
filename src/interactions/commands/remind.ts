@@ -7,7 +7,7 @@ const config = new SlashCommandBuilder()
 	.setDescription("Set a reminder that will ping you when the time comes.")
 	.addStringOption(option => option
 		.setName("description")
-		.setDescription("Set a short description for your reminder reminder.")
+		.setDescription("Set a short description for your reminder.")
 		.setRequired(true)
 	)
 	.addStringOption(option => option
@@ -118,7 +118,6 @@ const decodeTimer = (time: string) => {
 			}
 		}
 	}
-
 
 	for (const unit in timeUnits) {
 		if (!time.includes(timeUnits[unit]))

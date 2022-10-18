@@ -1,6 +1,6 @@
 {
 	"name": "kemobot",
-	"version": "1.5.4",
+	"version": "1.5.5",
 	"description": "Sphygmus' personal Discord and Twitch bot.",
 	"scripts": {
 		"start": "ts-node src/discord.ts",

@@ -166,22 +166,22 @@ const updateLiquidInterface = async () => {
 	const buttonOptions = new ActionRowBuilder<ButtonBuilder>()
 		.addComponents(
 			new ButtonBuilder()
-				.setLabel("Liquid+")
-				.setStyle(ButtonStyle.Link)
-				.setURL("https://liquidplus.com/"),
-			new ButtonBuilder()
-				.setCustomId("btn-refresh-streams")
+				.setCustomId("btn-liquidplus-refresh")
 				.setLabel("Refresh")
 				.setStyle(ButtonStyle.Primary)
 				.setDisabled(!streamData.running),
 			new ButtonBuilder()
-				.setCustomId("btn-update-prio")
+				.setCustomId("btn-liquidplus-toggle")
+				.setLabel("Toggle")
+				.setStyle(streamData.running ? ButtonStyle.Success : ButtonStyle.Danger),
+			new ButtonBuilder()
+				.setCustomId("btn-liquidplus-prio")
 				.setLabel("Update Prioritized Streams")
 				.setStyle(ButtonStyle.Secondary),
 			new ButtonBuilder()
-				.setCustomId("btn-toggle-twitch")
-				.setLabel("Toggle")
-				.setStyle(streamData.running ? ButtonStyle.Success : ButtonStyle.Danger)
+				.setLabel("Liquid+")
+				.setStyle(ButtonStyle.Link)
+				.setURL("https://liquidplus.com/")
 		)
 
 	const message: MessageReplyOptions = {
@@ -194,7 +194,8 @@ const updateLiquidInterface = async () => {
 	try {
 		if (liquidPlusData.interface) {
 			const interfaceMessage = await dmChannel.messages.fetch(liquidPlusData.interface);
-			interfaceMessage.edit(message);
+			if (interfaceMessage.editable)
+				interfaceMessage.edit(message);
 		}
 	} catch (e) {
 		const newInterface = await dmChannel.send(message);

@@ -27,7 +27,7 @@ export default <MessageAction>{
 	users: ["612713932574031879"],
 	exec: async message => {
 		const chanceToReply = Math.floor(Math.random() * 5);
-		if (chanceToReply < 5) {
+		if (chanceToReply === 0) {
 			const replyTypeNum = Math.floor(Math.random() * 10);
 			if (replyTypeNum < 5) {
 				const randomPhrase = Math.floor(Math.random() * phrases.length);

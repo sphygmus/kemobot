@@ -107,6 +107,11 @@ const interfaceObject = async (guildID: string) => {
 				.setLabel("Add Songs")
 				.setStyle(ButtonStyle.Primary),
 			new ButtonBuilder()
+				.setCustomId("btn-music-toggle")
+				.setLabel(playing ? "Pause" : "Play")
+				.setStyle(playing ? ButtonStyle.Success : ButtonStyle.Danger)
+				.setDisabled(guildQueue.queue.length === 0),
+			new ButtonBuilder()
 				.setCustomId("btn-music-loop")
 				.setLabel(`Loop: ${loopingText[guildQueue.looping]}`)
 				.setStyle(ButtonStyle.Secondary)
@@ -121,11 +126,6 @@ const interfaceObject = async (guildID: string) => {
 				.setLabel("Skip")
 				.setStyle(ButtonStyle.Secondary)
 				.setDisabled(guildQueue.queue.length < 2),
-			new ButtonBuilder()
-				.setCustomId("btn-music-stop")
-				.setLabel("Stop")
-				.setStyle(ButtonStyle.Danger)
-				.setDisabled(guildQueue.queue.length === 0)
 		)
 
 	return <MessageReplyOptions>{
