@@ -4,6 +4,7 @@ import { TextChannel } from "discord.js";
 import Discord from "../discord";
 
 const REMINDERS_PATH = path.resolve(__dirname, "../data/reminders.json");
+const INTEGER_LIMIT = 2147483647;
 
 interface LocalTimer extends Timer {
 	timer: NodeJS.Timeout;
@@ -14,11 +15,21 @@ const localTimers: LocalTimer[] = [];
 
 const setTimer = async (data: Timer) => {
 	const currentTime = Date.now();
+	const minTime = Math.min(INTEGER_LIMIT, data.targetTime - currentTime);
 	const timeOut = await new Promise<NodeJS.Timeout>((res) => {
 		const timer = setTimeout(async () => {
+			if (minTime === INTEGER_LIMIT) {
+				const runningTimeout = getLocalTimer(data);
+				if (runningTimeout)
+					clearTimeout(runningTimeout.timer);
+
+				await setTimer(data);
+				return;
+			}
+
 			deleteReminder(data);
 
-			const difference = Date.now() - data.targetTime;
+			const difference = Date.now() - data.targetTime + 1000;
 			const days = Math.floor(difference / (1000 * 60 * 60 * 24));
 
 			try {
@@ -29,7 +40,7 @@ const setTimer = async (data: Timer) => {
 			} catch (e) {
 				console.log("> [Discord] An error occured while firing the reminder.");
 			}
-		}, data.targetTime - currentTime);
+		}, minTime);
 
 		res(timer);
 	});

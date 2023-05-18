@@ -1,5 +1,5 @@
 import { AudioPlayerStatus, createAudioPlayer, createAudioResource, getVoiceConnection, joinVoiceChannel, VoiceConnectionStatus } from "@discordjs/voice";
-import { ActionRowBuilder, APIEmbedField, ButtonBuilder, ButtonStyle, Colors, EmbedBuilder, MessageReplyOptions, TextChannel, VoiceChannel } from "discord.js";
+import { ActionRowBuilder, APIEmbedField, ButtonBuilder, ButtonStyle, Colors, EmbedBuilder, InteractionEditReplyOptions, MessageCreateOptions, TextChannel, VoiceChannel } from "discord.js";
 import { search } from "youtube-search-without-api-key";
 import ytdl from "ytdl-core";
 
@@ -128,7 +128,7 @@ const interfaceObject = async (guildID: string) => {
 				.setDisabled(guildQueue.queue.length < 2),
 		)
 
-	return <MessageReplyOptions>{
+	return <InteractionEditReplyOptions>{
 		embeds: [embed],
 		components: [buttonOptions]
 	};;
@@ -179,7 +179,7 @@ const showPlayerInterface = async (guildID: string, channelID?: string) => {
 
 				await oldInterface.edit(playerInterface);
 			} catch (err) {
-				console.log(err);
+				console.warn("> [Discord] Previous player interface was not found. Recreating a new interface.");
 				return;
 			}
 		}
@@ -189,7 +189,7 @@ const showPlayerInterface = async (guildID: string, channelID?: string) => {
 		await updateOldInterface(true);
 		const channel = await guildData.channels.fetch(channelID) as TextChannel | null;
 		if (channel) {
-			const newInterface = await channel.send(playerInterface);
+			const newInterface = await channel.send(playerInterface as MessageCreateOptions);
 
 			savedGuildData.music = {
 				channelID,

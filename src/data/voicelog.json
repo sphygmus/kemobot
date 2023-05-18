@@ -1,1 +1,25 @@
-[]
+[
+    {
+        "guildID": "630111968832913440",
+        "logs": [
+            {
+                "userID": "204591527878459392",
+                "before": "(undefined)",
+                "after": "Heaven",
+                "time": 1684379856872
+            },
+            {
+                "userID": "630095338765680643",
+                "before": "(undefined)",
+                "after": "Heaven",
+                "time": 1684379868403
+            },
+            {
+                "userID": "630095338765680643",
+                "before": "Heaven",
+                "after": "(undefined)",
+                "time": 1684380336269
+            }
+        ]
+    }
+]

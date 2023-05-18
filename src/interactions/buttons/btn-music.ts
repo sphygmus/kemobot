@@ -40,6 +40,12 @@ export default <ButtonAction>{
 
 		const ids = splitInteractionID(interaction.customId);
 		const buttonType = ids[2] as ButtonType;
+
+		if (["loop", "skip", "toggle"].includes(buttonType)) {
+			await interaction.deferReply();
+			await interaction.deleteReply();
+		}
+
 		switch (buttonType) {
 			case "add":
 				const modal = new ModalBuilder()
@@ -76,8 +82,5 @@ export default <ButtonAction>{
 				toggleSong(interaction.guild.id);
 				break;
 		}
-
-		await interaction.deferReply();
-		await interaction.deleteReply();
 	}
 }

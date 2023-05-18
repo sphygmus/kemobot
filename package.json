@@ -1,6 +1,6 @@
 {
 	"name": "kemobot",
-	"version": "1.5.5",
+	"version": "1.5.6",
 	"description": "Sphygmus' personal Discord and Twitch bot.",
 	"scripts": {
 		"start": "ts-node src/discord.ts",
@@ -13,16 +13,16 @@
 	"license": "ISC",
 	"dependencies": {
 		"@discordjs/opus": "^0.8.0",
-		"@discordjs/voice": "^0.13.0",
+		"@discordjs/voice": "^0.16.0",
 		"axios": "^1.1.2",
-		"discord.js": "^14.6.0",
+		"discord.js": "^14.11.0",
 		"dotenv": "^16.0.3",
 		"ffmpeg-static": "^5.1.0",
 		"sodium-native": "^3.4.1",
 		"tmi.js": "^1.8.5",
 		"twitter-api-v2": "^1.12.8",
 		"youtube-search-without-api-key": "^1.0.7",
-		"ytdl-core": "^4.11.2"
+		"ytdl-core": "^4.11.4"
 	},
 	"devDependencies": {
 		"@types/tmi.js": "^1.8.1",

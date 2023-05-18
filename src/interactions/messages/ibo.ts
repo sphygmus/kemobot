@@ -18,7 +18,8 @@ const phrases = [
 
 const images = [
 	path.join(__dirname, "../../assets/message_assets/didntask.png"),
-	path.join(__dirname, "../../assets/message_assets/didntask2.png")
+	path.join(__dirname, "../../assets/message_assets/didntask2.png"),
+	path.join(__dirname, "../../assets/message_assets/no-askers.png")
 ];
 
 const reactions = ["🇩", "🇮", "<:d_alt:959897469842501652>", "🇳", "🇹", "🇦", "🇸", "🇰"];

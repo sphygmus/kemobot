@@ -1,10 +1,13 @@
 {
-	"prioritized": [],
-	"checkins": [],
-	"interface": "0",
-	"streamData": {
-		"lastUpdate": 0,
-		"streams": [],
-		"running": false
-	}
+    "prioritized": [],
+    "checkins": [],
+    "interface": "1108594050694664262",
+    "streamData": {
+        "lastUpdate": 1684379135539,
+        "streams": [
+            "bwipolol",
+            "alixxa"
+        ],
+        "running": true
+    }
 }

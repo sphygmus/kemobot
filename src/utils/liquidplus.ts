@@ -2,7 +2,7 @@ import fs from "fs";
 import path from "path";
 import axios from "axios";
 
-import { ActionRowBuilder, ButtonBuilder, ButtonStyle, Colors, EmbedBuilder, MessageReplyOptions } from "discord.js";
+import { ActionRowBuilder, ButtonBuilder, ButtonStyle, Colors, EmbedBuilder, MessageEditOptions, MessageReplyOptions } from "discord.js";
 import Twitch from "../twitch";
 import { getFatherDMChannel } from "./messages";
 
@@ -184,7 +184,7 @@ const updateLiquidInterface = async () => {
 				.setURL("https://liquidplus.com/")
 		)
 
-	const message: MessageReplyOptions = {
+	const message: MessageEditOptions = {
 		embeds: [embed],
 		components: [buttonOptions],
 		files: [path.resolve(__dirname, "../assets/liquidpluslogo.png")]
@@ -198,7 +198,7 @@ const updateLiquidInterface = async () => {
 				interfaceMessage.edit(message);
 		}
 	} catch (e) {
-		const newInterface = await dmChannel.send(message);
+		const newInterface = await dmChannel.send(message as MessageReplyOptions);
 		liquidPlusData.interface = newInterface.id;
 		saveLiquidPlusData(liquidPlusData);
 	}
